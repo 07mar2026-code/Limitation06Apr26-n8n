@@ -1,0 +1,982 @@
+{
+  "name": "Daily Shepherd",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ \nJSON.stringify({\n  \"replyToken\": $('接收 LINE 事件').item.json.body.events[0].replyToken,\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": $json.output\n    }\n  ]\n}) \n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1392,
+        1184
+      ],
+      "id": "aa31ebc2-e7f6-4a67-a7ff-70484e9f6c39",
+      "name": "D7. 回覆 LINE 牧養訊息"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.events[0].message.text }}",
+        "options": {
+          "systemMessage": "=# 角色\n你是一位專業的教會草場牧養小幫手。\n\n# 任務\n請根據用戶輸入的煩惱內容，精準進行分類。\n\n# 限制條件（嚴格遵守）\n1. 只能從以下三個選項中選擇一個：【感情】、【財務】、【家庭】。\n2. 違反此規則將導致系統錯誤：禁止輸出任何標點符號、空格、解釋說明或引言。\n3. 只能輸出那兩個字，例如：家庭"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        240,
+        1168
+      ],
+      "id": "b5893ca7-fd0f-446c-bbc2-003e3d30cc73",
+      "name": "D1. 分析使用者訊息"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['最後一個問題'] }}",
+        "options": {
+          "systemMessage": "=角色設定\n你是一位全能型、溫暖且充滿屬天智慧的 LINE 牧養助理。你帶著基督的愛與關懷，精通感情與家庭溝通以及聖經理財觀念與基礎財務諮詢。請根據使用者輸入的內容，自動辨識主題、在必要時主動調用搜尋工具，並切換至對應的專家身份。\n\n工具調用與知識整合規範\n\n觸發條件：當使用者提及的問題涉及心理學階段、家庭發展模型、理財觀念、債務協商機制，或需要具體社會數據支持時，你必須主動調用搜尋工具。\n\n知識轉化鐵律：搜尋完畢後，嚴禁直接複製網頁學術或法規文字。你必須將搜尋到的理論融合聖經真理，轉化為充滿牧者恩典與智慧的暖心語言。\n\n核心規則與回覆原則\n\n感情與家庭：極具同理心、溫暖、不批判。結合搜尋到的家庭生命週期理論，帶入聖經中「愛與包容」原則提供建議。\n\n財務與理財：理性、客觀、專業。提供結構化財務邏輯（如：532原則、緊急預備金）。嚴禁推薦特定股票或標的。末端加上警語：「以上為通則理財觀念分享，不構成實質投資建議。」\n\n日常閒聊與其他：保持幽默、親切、簡短對話，不需調用搜尋工具，將平安與喜樂帶給使用者。\n\nLINE 行動裝置排版與格式規範（鐵律，請嚴格執行）\n\n嚴格使用臺灣繁體中文，禁用任何 Markdown 語法：全文字符嚴禁出現任何 Markdown 標記，包含星號（*）、井號（#）、底線（_）或任何粗體與斜體語法。所有段落與標題請直接用中文文字表達，絕對不可在標題前方加上井號。需要強調時請改用引號「」或直接換行。\n\n字數嚴格限制：單次整體回覆必須控制在 200 到 500 字之內。即使調用工具獲得大量資料，也必須精煉濃縮至此區間，拿捏在教友輸出的6成數字量，不可過長或過短。\n\n畫面可讀性：多使用直接換行與短橫線進行清單排列，增加手機閱讀的舒適度。適度加入 1 到 2 個表情符號增添溫度，但切勿濫用。\n\n必備回應元素：回覆內容必須包含至少一處聖經經文與書卷章節。\n\n結尾雙重提問：回覆的最終末端，必須提出 2 個陪伴引導式的諮商問題，用來促進教友思考與對話。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1120,
+        1184
+      ],
+      "id": "072381e8-bd0b-4ecd-aad0-f0ed72208031",
+      "name": "D6. 生成牧養回覆"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ff6fc1c-35c8-4975-bf67-8e5390bbf205",
+              "name": "問題類型",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "9226f453-ffc7-4775-abe0-b1723ab5712b",
+              "name": "問題種類",
+              "value": "={{ $('接收 LINE 事件').item.json.body.events[0].message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "38ef4eb6-6c19-4da6-bd6a-1adb94c1b692",
+              "name": "發送者",
+              "value": "={{ $('接收 LINE 事件').item.json.body.events[0].source.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "28b5cde9-3e88-43b8-8d21-36b48acaad79",
+              "name": "發送時間",
+              "value": "={{ $now.setZone('Asia/Taipei').format('yyyy-MM-dd HH') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        1184
+      ],
+      "id": "2aa668b2-01dc-410d-89be-937b6595d2b0",
+      "name": "D2. 整理對話紀錄欄位"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "[REDACTED_DOCUMENT_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "[REDACTED_SHEET_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        816,
+        1184
+      ],
+      "id": "6f878238-623c-4fd3-acfa-406239bb2fc1",
+      "name": "D4. 讀取歷史對話紀錄"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 取得所有輸入資料\nconst allItems = $input.all();\n\n// 取得最後一筆資料\nconst lastItem = allItems[allItems.length - 1];\n\n// 封裝成 n8n 要求的陣列格式回傳\nreturn [\n  {\n    json: {\n      最後一個問題: lastItem.json['問題內容']\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        1184
+      ],
+      "id": "9c614e3f-5578-44a7-a475-12179b2b1daa",
+      "name": "D5. 組合對話上下文"
+    },
+    {
+      "parameters": {
+        "description": "當使用者提及「感情煩惱、家庭衝突、溝通困難（如跟家人溝通困難）、心理壓力或需要聖經屬靈指引與實踐建議」時，必須調用此工具。此工具能搜尋並回傳融合聖經真理與心理支持的牧養指引資料。",
+        "workflowId": {
+          "__rl": true,
+          "value": "[REDACTED_WORKFLOW_ID]",
+          "mode": "list",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ $('D5. 組合對話上下文').item.json['最後一個問題'] }}\n"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        1472
+      ],
+      "id": "341db00f-bf80-4cd3-9c42-2f09c301286a",
+      "name": "D9. 呼叫牧養工具流程"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        240,
+        1360
+      ],
+      "id": "7ba22118-6e1d-49d8-8ec7-d4db9690fc3d",
+      "name": "D8. 牧養對話語言模型"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "[REDACTED_LINE_WEBHOOK_PATH]",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        960
+      ],
+      "id": "a4158fe8-a571-408b-9f55-a333812a45e5",
+      "name": "接收 LINE 事件",
+      "webhookId": "[REDACTED_LINE_WEBHOOK_ID]"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.events[0].message.text }}",
+                    "rightValue": "近期活動",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1a83d2a3-0b27-43dc-b532-d310b8850794"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e9d7768e-b1d5-4cf2-ba4a-ef3283775563",
+                    "leftValue": "={{ $json.body.events[0].message.text }}",
+                    "rightValue": "工作",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "def10647-ed2b-4958-8bfd-93ba42444cda",
+                    "leftValue": "={{ $json.body.events[0].message.text }}",
+                    "rightValue": "討論串",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2ae63348-82d4-486c-81e8-826fa7e973f0",
+                    "leftValue": "={{ $json.body.events[0].message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "edf675d1-921d-4a7b-8c19-2eebe659812c",
+                    "leftValue": "={{ $json.body.events[0].message.text }}",
+                    "rightValue": "✏️ [工作留言]：",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1a28b378-5d94-4d5a-9085-856ed0d0bb11",
+                    "leftValue": "={{ [\"image\", \"file\"].includes($json.body.events[0].message.type) }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "OCR"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        960
+      ],
+      "id": "8f55753e-f252-4d21-bc80-d1d29d1eaff3",
+      "name": "判斷 LINE 訊息類型"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "[REDACTED_DOCUMENT_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "[REDACTED_SHEET_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        720
+      ],
+      "id": "2f9c8344-479c-4373-9878-854219fbaf0d",
+      "name": "A1. 讀取近期活動資料"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=以下是活動內容：\n{{ JSON.stringify($json.activities) }}",
+        "options": {
+          "systemMessage": "你是一個精準的資料整理助手。\n請將輸入的 JSON 活動資料整理成一個乾淨、易讀的 Markdown 表格（包含：開始日期、結束日期、活動名稱、活動內容）。\n\n【嚴格遵守以下輸出格式規範】：\n1. 第一行開頭必須完全是這句話：「您好，這是近期活動」\n2. 接著換行，直接輸出 Markdown 表格。\n3. 除了上述內容，不要講任何多餘的廢話、寒暄或代碼區塊符號（如 ```）。\n\n【範例格式】：\n您好，這是近期活動\n| 開始日期 | 結束日期 | 活動名稱 | 活動內容 |\n| --- | --- | --- | --- |\n| 20260617 | 20260630 | 聚餐月 | 聯繫感情 |"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        656,
+        720
+      ],
+      "id": "8ba5aa4e-ced3-4a84-88d4-6b5df7d83a33",
+      "name": "A3. 生成近期活動回覆"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 抓取 Sheet 節點輸出的所有資料\nconst allRows = $input.all();\n\n// 將每一列的 json 資料提取出來，組合成一個乾淨的陣列\nconst activityList = allRows.map(item => item.json);\n\n// 將整個陣列包進單一一個物件中輸出\nreturn {\n  activities: activityList\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        720
+      ],
+      "id": "25b32a9c-034f-486a-9ea3-5048c54e4ba7",
+      "name": "A2. 整理近期活動內容"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\nJSON.stringify({\n  \"replyToken\": $('接收 LINE 事件').item.json.body.events[0].replyToken,\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": $('A3. 生成近期活動回覆').item.json.output\n    }\n  ]\n})\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        944,
+        720
+      ],
+      "id": "e9618fa6-ec7f-4926-bb1a-867017174e82",
+      "name": "A4. 回覆 LINE 近期活動"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "[REDACTED_DOCUMENT_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "[REDACTED_SHEET_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        848
+      ],
+      "id": "070b7347-0d89-408e-9ea5-002b6c8410c2",
+      "name": "B1. 讀取工作討論串"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $json.body.events[0].replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"template\",\n      \"altText\": \"請選擇您要諮詢的主題\",\n      \"template\": {\n        \"type\": \"buttons\",\n        \"text\": \"請選擇您今天想要聊聊的主題：\",\n        \"actions\": [\n          {\n            \"type\": \"message\",\n            \"label\": \"💼 工作\",\n            \"text\": \"工作\"\n          },\n          {\n            \"type\": \"message\",\n            \"label\": \"❤️ 感情\",\n            \"text\": \"感情\"\n          }\n        ]\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        240,
+        1008
+      ],
+      "id": "e2506df7-5ce4-4160-befc-7de546b2c4d9",
+      "name": "C1. 顯示討論串選單"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. 獲取前一個節點（Google Sheets）輸出的所有資料\nconst items = $input.all();\n\n// 2. 建立一個陣列來存放處理後的結果\nlet result = [];\n\nfor (let item of items) {\n  // 檢查資料裡面有沒有「工作」這一欄，且內容不為空\n  if (item.json.工作 && item.json.工作.trim() !== \"\") {\n    result.push({\n      json: {\n        // 這裡可以自訂你想傳給下一個 AI 節點的欄位名稱\n        topic: \"工作\",\n        content: item.json.工作,\n        row_number: item.json.row_number\n      }\n    });\n  }\n}\n\n// 3. 回傳處理後的資料給下一個節點\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        848
+      ],
+      "id": "bc3014f7-f39e-4020-83d0-548a26560186",
+      "name": "B2. 整理工作討論串"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $('接收 LINE 事件').item.json.body.events[0].replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"flex\",\n      \"altText\": \"工作討論串內容\",\n      \"contents\": {\n        \"type\": \"bubble\",\n        \"size\": \"mega\",\n        \"header\": {\n          \"type\": \"box\",\n          \"layout\": \"vertical\",\n          \"contents\": [\n            {\n              \"type\": \"text\",\n              \"text\": \"💼 工作討論串內容\",\n              \"weight\": \"bold\",\n              \"color\": \"#FFFFFF\",\n              \"size\": \"lg\"\n            }\n          ],\n          \"backgroundColor\": \"#0367A6\"\n        },\n        \"body\": {\n          \"type\": \"box\",\n          \"layout\": \"vertical\",\n          \"contents\": [\n            {\n              \"type\": \"text\",\n              \"text\": \"{{ $json.content }}\",\n              \"wrap\": true,\n              \"size\": \"md\",\n              \"color\": \"#333333\"\n            }\n          ],\n          \"paddingAll\": \"xxl\"\n        },\n        \"footer\": {\n          \"type\": \"box\",\n          \"layout\": \"vertical\",\n          \"contents\": [\n            {\n              \"type\": \"button\",\n              \"style\": \"primary\",\n              \"color\": \"#0367A6\",\n              \"action\": {\n                \"type\": \"postback\",\n                \"label\": \"✍️ 我要留言\",\n                \"data\": \"action=comment\",\n                \"inputOption\": \"openKeyboard\",\n                \"fillInText\": \"✏️ [工作留言]：\"\n              }\n            }\n          ]\n        }\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        528,
+        848
+      ],
+      "id": "e4321240-9d81-47f8-8f84-269f9583dcf7",
+      "name": "B3. 回覆 LINE 討論串內容"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "[REDACTED_DOCUMENT_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "[REDACTED_SHEET_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "工作": "={{ $('接收 LINE 事件').item.json.body.events[0].message.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "感情",
+              "displayName": "感情",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "工作",
+              "displayName": "工作",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        1504
+      ],
+      "id": "c4b21ab1-da17-4ade-92c5-8c2e1ac8c598",
+      "name": "E1. 儲存工作留言"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "[REDACTED_DOCUMENT_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "[REDACTED_SHEET_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "問題類型": "={{ $json['問題類型'] }}",
+            "發送者": "={{ $json['發送者'] }}",
+            "問題發送時間": "={{ $json['發送時間'] }}",
+            "問題內容": "={{ $json['問題種類'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "問題發送時間",
+              "displayName": "問題發送時間",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "發送者",
+              "displayName": "發送者",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "問題內容",
+              "displayName": "問題內容",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "問題類型",
+              "displayName": "問題類型",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "備註",
+              "displayName": "備註",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        656,
+        1184
+      ],
+      "id": "660049be-f6a4-4d7b-9e2b-44e19dfd2911",
+      "name": "D3. 儲存使用者訊息"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://20260419.zeabur.app/webhook/[REDACTED_OCR_WEBHOOK_PATH]",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "840e85cc-5bb2-4bb1-b775-001e3b4be4ac",
+      "name": "F1. 呼叫 OCR 辨識服務",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        240,
+        1792
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  \"replyToken\": $('接收 LINE 事件').item.json.body.events[0].replyToken,\n  \"messages\": [{ \"type\": \"text\", \"text\": $json.output }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        496,
+        1792
+      ],
+      "id": "2b0e09a7-ebe8-41d4-ae28-6e99773cdfb9",
+      "name": "F2. 回覆 LINE OCR 結果"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "D1. 分析使用者訊息": {
+      "main": [
+        [
+          {
+            "node": "D2. 整理對話紀錄欄位",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D6. 生成牧養回覆": {
+      "main": [
+        [
+          {
+            "node": "D7. 回覆 LINE 牧養訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D2. 整理對話紀錄欄位": {
+      "main": [
+        [
+          {
+            "node": "D3. 儲存使用者訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D4. 讀取歷史對話紀錄": {
+      "main": [
+        [
+          {
+            "node": "D5. 組合對話上下文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D5. 組合對話上下文": {
+      "main": [
+        [
+          {
+            "node": "D6. 生成牧養回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D9. 呼叫牧養工具流程": {
+      "ai_tool": [
+        [
+          {
+            "node": "D6. 生成牧養回覆",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D8. 牧養對話語言模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "D1. 分析使用者訊息",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "D6. 生成牧養回覆",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "A3. 生成近期活動回覆",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "接收 LINE 事件": {
+      "main": [
+        [
+          {
+            "node": "判斷 LINE 訊息類型",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "判斷 LINE 訊息類型": {
+      "main": [
+        [
+          {
+            "node": "A1. 讀取近期活動資料",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "B1. 讀取工作討論串",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "C1. 顯示討論串選單",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "D1. 分析使用者訊息",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "E1. 儲存工作留言",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "F1. 呼叫 OCR 辨識服務",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1. 讀取近期活動資料": {
+      "main": [
+        [
+          {
+            "node": "A2. 整理近期活動內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2. 整理近期活動內容": {
+      "main": [
+        [
+          {
+            "node": "A3. 生成近期活動回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3. 生成近期活動回覆": {
+      "main": [
+        [
+          {
+            "node": "A4. 回覆 LINE 近期活動",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B1. 讀取工作討論串": {
+      "main": [
+        [
+          {
+            "node": "B2. 整理工作討論串",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B2. 整理工作討論串": {
+      "main": [
+        [
+          {
+            "node": "B3. 回覆 LINE 討論串內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D3. 儲存使用者訊息": {
+      "main": [
+        [
+          {
+            "node": "D4. 讀取歷史對話紀錄",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "F1. 呼叫 OCR 辨識服務": {
+      "main": [
+        [
+          {
+            "node": "F2. 回覆 LINE OCR 結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2128b350-3657-437d-b0a7-cd7404c94058",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9e4e671a774c9d6ee8f309863edb9ffde40285fd60b5b07ada21add262b3319a"
+  },
+  "id": "rsb2LopjADULqxhx",
+  "tags": []
+}
