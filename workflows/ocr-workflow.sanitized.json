@@ -1,0 +1,1032 @@
+{
+  "name": "OCR workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "[REDACTED_OCR_WEBHOOK_PATH]",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -112,
+        2512
+      ],
+      "id": "5f2a45d0-f60b-45bc-b333-d4d57ead8342",
+      "name": "接收內部 OCR 請求",
+      "webhookId": "[REDACTED_OCR_WEBHOOK_ID]"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ \nJSON.stringify({\n  \"replyToken\": $('接收內部 OCR 請求').item.json.body.events[0].replyToken,\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": $json.output\n    }\n  ]\n}) \n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1168,
+        1536
+      ],
+      "id": "11b616e7-a651-49c9-b612-c9c34bd9f6aa",
+      "name": "E7. 舊版回覆 LINE 訊息"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.events[0].message.text }}",
+        "options": {
+          "systemMessage": "=# 角色\n你是一位專業的教會草場牧養小幫手。\n\n# 任務\n請根據用戶輸入的煩惱內容，精準進行分類。\n\n# 限制條件（嚴格遵守）\n1. 只能從以下三個選項中選擇一個：【感情】、【財務】、【家庭】。\n2. 違反此規則將導致系統錯誤：禁止輸出任何標點符號、空格、解釋說明或引言。\n3. 只能輸出那兩個字，例如：家庭"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        16,
+        1536
+      ],
+      "id": "30c2d919-75eb-48d4-b8ec-547cbea311cf",
+      "name": "E1. 舊版分析使用者訊息"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['最後一個問題'] }}",
+        "options": {
+          "systemMessage": "=# 角色設定\n你是一位全能型、溫暖且充滿屬天智慧的 LINE 牧養助理。你帶著基督的愛與關懷，精通「感情與家庭溝通」以及「聖經理財觀念與基礎財務諮詢」。請根據使用者輸入，自動辨識主題、在必要時主動調用搜尋工具。\n\n# 工具調用規範\n- 觸發條件：當使用者提及的問題涉及心理學階段、家庭發展模型、理財觀念、債務協商機制，或需要具體社會數據支持時，你必須主動調用搜尋工具。\n- 知識轉化：搜尋完畢後，嚴禁直接複製網頁學術或法規文字。你必須將搜尋到的理論融合聖經真理，轉化為充滿恩典與智慧的語言。\n\n# 核心規則與回覆原則\n1. 感情與家庭：極具同理心、溫暖、不批判。結合搜尋到的家庭生命週期理論，帶入聖經中「愛與包容」原則提供建議。\n2. 財務與理財：理性、客觀、專業。提供結構化財務邏輯（如：532原則、緊急預備金）。嚴禁推薦特定股票或標的。末端加上警語：「以上為通則理財觀念分享，不構成實質投資建議。」\n3. 日常閒聊：保持幽默、親切、簡短對話（不需調用工具）。\n\n# LINE 排版規範 (嚴格執行)\n- 字數限制：整體回覆控制在 200 到 300 字之內。\n- 格式：多使用「換行」與「短橫線 -」排列。適度加入 1-2 個表情符號。\n- 必備元素：必須包含至少一處聖經經文與書卷章節；結尾提出 2 個陪伴引導式的諮商問題。\n- 禁用星號：全文字符嚴禁出現任何星號（*），需要強調請改用引號「」或直接換行。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        896,
+        1536
+      ],
+      "id": "cf13c522-4f40-4897-a885-b5333ff6bb3c",
+      "name": "E6. 舊版生成對話回覆"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        624,
+        2432
+      ],
+      "id": "602b56d5-b514-4827-af21-6dde658257f2",
+      "name": "D1. OCR 結果整理模型"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "[REDACTED_DOCUMENT_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "[REDACTED_SHEET_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "問題類型": "={{ $json['問題類型'] }}",
+            "發送者": "={{ $json['發送者'] }}",
+            "問題發送時間": "={{ $json['發送時間'] }}",
+            "問題內容": "={{ $json['問題種類'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "問題發送時間",
+              "displayName": "問題發送時間",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "發送者",
+              "displayName": "發送者",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "問題內容",
+              "displayName": "問題內容",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "問題類型",
+              "displayName": "問題類型",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "備註",
+              "displayName": "備註",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        432,
+        1536
+      ],
+      "id": "48f1ec21-f80e-4a25-9460-38011f869e40",
+      "name": "E3. 舊版儲存使用者訊息"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ff6fc1c-35c8-4975-bf67-8e5390bbf205",
+              "name": "問題類型",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "9226f453-ffc7-4775-abe0-b1723ab5712b",
+              "name": "問題種類",
+              "value": "={{ $('接收內部 OCR 請求').item.json.body.events[0].message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "38ef4eb6-6c19-4da6-bd6a-1adb94c1b692",
+              "name": "發送者",
+              "value": "={{ $('接收內部 OCR 請求').item.json.body.events[0].source.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "28b5cde9-3e88-43b8-8d21-36b48acaad79",
+              "name": "發送時間",
+              "value": "={{ $now.setZone('Asia/Taipei').format('yyyy-MM-dd HH') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        1536
+      ],
+      "id": "657cac30-57e9-468f-8f6e-8f9fc6955aa2",
+      "name": "E2. 舊版整理對話欄位"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "[REDACTED_DOCUMENT_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "[REDACTED_SHEET_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        576,
+        1536
+      ],
+      "id": "f3b2c5a7-127e-47f1-a517-2a3988d63a4c",
+      "name": "E4. 舊版讀取歷史對話"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "365e51e1-fe45-4e8d-854c-b2fceac24d8a",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        1280
+      ],
+      "id": "6369139a-1239-48d8-95ab-ff4c59e8d2c0",
+      "name": "F1. 判斷是否建立雲端資料夾"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "operation": "share",
+        "folderNoRootId": {
+          "__rl": true,
+          "value": "[REDACTED_FOLDER_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "fileOrganizer",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        0,
+        1280
+      ],
+      "id": "5779d524-24b5-4a08-b7ab-34d7115ffdc2",
+      "name": "F2. 分享 Google Drive 資料夾"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 取得所有輸入資料\nconst allItems = $input.all();\n\n// 取得最後一筆資料\nconst lastItem = allItems[allItems.length - 1];\n\n// 封裝成 n8n 要求的陣列格式回傳\nreturn [\n  {\n    json: {\n      最後一個問題: lastItem.json['問題內容']\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        1536
+      ],
+      "id": "04904fbc-5a2c-40a7-a2cb-9899485ad2a1",
+      "name": "E5. 舊版組合對話上下文"
+    },
+    {
+      "parameters": {
+        "description": "當使用者提及「感情煩惱、家庭衝突、溝通困難（如跟家人溝通困難）、心理壓力或需要聖經屬靈指引與實踐建議」時，必須調用此工具。此工具能搜尋並回傳融合聖經真理與心理支持的牧養指引資料。",
+        "workflowId": {
+          "__rl": true,
+          "value": "[REDACTED_WORKFLOW_ID]",
+          "mode": "list",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ $('E5. 舊版組合對話上下文').item.json['最後一個問題'] }}\n"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        1824
+      ],
+      "id": "aacca221-54f5-4008-9484-1c084ad997a5",
+      "name": "E9. 舊版呼叫工具流程"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5e645ecb-c03e-4689-8030-00f0207e1444",
+              "leftValue": "={{ $json.body.events[0].message.type }}",
+              "rightValue": "image",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -32,
+        3328
+      ],
+      "id": "198c4c5f-ce7e-4524-9e89-f03ffd026e0e",
+      "name": "G1. 舊版條件判斷"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]"
+        },
+        "text": "這個圖片在講什麼？",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        2304
+      ],
+      "id": "2620512e-7972-4686-a256-7b5368934c9b",
+      "name": "A2. 執行圖片文字辨識"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.content.parts[0].text }}",
+        "options": {
+          "systemMessage": "你是一個專業的 OCR 文字辨識與數位筆記整理專家。請精準辨識輸入圖片中的所有文字，並轉化為結構清晰、具備邏輯性的數位筆記。請嚴格遵守以下排版與格式規則：\n\n1.【結構化輸出規範】\n- 段落：若內容為文章或筆記，依據圖片中的語意邏輯進行自然換行，保持清晰的段落分明。每段核心觀點或主題之間，請空一行以提升可讀性。\n- 清單：若內容為項目清單，請使用 Markdown 清單格式（* 或 -）呈現，並保持合理的縮排。核心關鍵字可使用 **粗體** 標記。\n- 表格：若內容包含表格結構、數據對照，請嘗試使用 Markdown 表格語法（| 表頭 |）呈現，並確保資料對齊。\n\n2.【文字精準度】\n- 保持原文語意，修正明顯的 OCR 錯別字，但不要刪減或任意改寫重要資訊。\n\n3.【回覆格式要求】\n請嚴格依據以下固定結構進行最終輸出：\n\n第一部分：標題為 【提取內容】，後接辨識並依上述規範排版好的文字內容。\n\n第二部分：標題為 【重點摘要】 或 【後續建議】。例如：若內容包含待辦事項，請列出摘要並主動詢問使用者是否需要協助加入行事曆或待辦清單。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        2304
+      ],
+      "id": "6614629d-86d9-4f7b-a755-41910ab4ca1c",
+      "name": "A3. 整理圖片辨識結果"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        2512
+      ],
+      "id": "0c92dc15-4bf2-4f1a-a86b-f227f7c703b4",
+      "name": "B2. 擷取 PDF 文字"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "你是一個專業的 OCR 文字辨識與數位筆記整理專家。請精準辨識輸入圖片中的所有文字，並轉化為結構清晰、具備邏輯性的數位筆記。請嚴格遵守以下排版與格式規則：\n\n1.【自動換行與段落】\n- 依據圖片中的語意邏輯進行自然換行，嚴禁所有文字擠在同一行。\n- 每段核心觀點或主題之間，請空一行（使用兩個換行符）以區隔段落，提升可讀性。\n\n2.【邏輯架構化】\n- 使用 Markdown 語法建立清晰的階層（如 # 標題、## 副標題）。\n- 重點內容、專有名詞、核心結論請使用 **粗體** 標記。\n- 條列式說明請使用無序清單（* 或 -）或有序清單（1., 2., 3.），並保持合理的縮排。\n\n3.【表格呈現】\n- 若圖片中包含表格、數據對照或清單，請一律轉換為「Markdown 表格」格式呈現。\n- 確保表頭（Header）清晰，並將資料對齊。\n\n4.【文字精準度】\n- 保持原文語意，修正明顯的 OCR 錯別字，但不要刪減或任意改寫重要資訊。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        2512
+      ],
+      "id": "428bbe4c-a0b2-4dfe-9041-dbe9d90cd935",
+      "name": "B3. 整理 PDF 辨識結果"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ \nJSON.stringify({\n  \"replyToken\": $('接收內部 OCR 請求').item.json.body.events[0].replyToken,\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": $json.output\n    }\n  ]\n}) \n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        912,
+        2416
+      ],
+      "id": "db46d013-003e-4e13-93f9-fbddb615f17e",
+      "name": "H1. 舊版回覆 LINE OCR 結果"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "[REDACTED_DOCUMENT_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "[REDACTED_SHEET_ID]",
+          "mode": "list",
+          "cachedResultName": "[REDACTED_RESOURCE_NAME]",
+          "cachedResultUrl": "[REDACTED_RESOURCE_URL]"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1072,
+        2416
+      ],
+      "id": "d262a4fc-5628-421e-95eb-ffca8ad4891a",
+      "name": "H2. 讀取 Email 收件資料"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        16,
+        1712
+      ],
+      "id": "e08fe1ff-986b-492f-b0f4-b696e5fadb85",
+      "name": "E8. 舊版對話語言模型"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.events[0].message.type }}",
+                    "rightValue": "=image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "55d461f9-e6a1-490a-a0c8-b56735d2a42c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "3faed1ff-0abd-4bdd-b8b7-bf4d26fa7363",
+                    "leftValue": "={{ $json.body.events[0].message.fileName }}",
+                    "rightValue": "pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pdf"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d9fab8d0-ec27-4ba1-aa8a-ea1c9eef627a",
+                    "leftValue": "={{ $json.body?.file?.extension || $json.file?.extension || 'none' }}",
+                    "rightValue": "docx",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "word"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        2496
+      ],
+      "id": "2863b676-1928-49cc-8967-068f74e2a26b",
+      "name": "判斷 OCR 檔案類型"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('H2. 讀取 Email 收件資料').item.json.Gmail }}",
+        "subject": "={{$now.toFormat('yyyy/MM/dd')}}數位筆記",
+        "message": "=<div style=\"font-family: 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif; max-width: 650px; margin: 20px auto; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); background-color: #ffffff;\">\n  \n  <h2 style=\"color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 12px; margin-top: 0; font-size: 22px; display: flex; align-items: center;\">\n    📝 {{ $now.toFormat('yyyy/MM/dd') }} 數位筆記摘要\n  </h2>\n  \n  <div style=\"background-color: #e8f0fe; padding: 12px 15px; border-left: 4px solid #1a73e8; border-radius: 4px; margin-bottom: 20px; font-size: 14px; color: #1967d2;\">\n    <strong>系統提示：</strong> 以下內容由 AI Agent 自動統整輸出，已為您保留最原始的格式排版。\n  </div>\n\n  <div style=\"font-size: 15px; line-height: 1.7; color: #333333;\">\n    <pre style=\"font-family: inherit; white-space: pre-wrap; word-break: break-all; margin: 0; background-color: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #f1f3f4;\">\n{{ $json.htmlText }}\n    </pre>\n  </div>\n  \n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        2416
+      ],
+      "id": "c84265c9-f339-480e-b438-f1a5b0de0d96",
+      "name": "H4. 寄送 HTML 格式 Email",
+      "webhookId": "d906612a-63bd-45cc-a8de-ea2c62060878"
+    },
+    {
+      "parameters": {
+        "jsCode": "let rawText = '未接收到 AI 筆記內容';\n\n// 嘗試抓取 AI Agent2 (圖片) 的輸出\ntry {\n  const agent2Output = $('A3. 整理圖片辨識結果').item?.json?.output;\n  if (agent2Output) rawText = agent2Output;\n} catch (e) {\n  // 如果 AI Agent2 沒執行，會進入這裡，我們就忽略錯誤往下走\n}\n\n// 嘗試抓取 AI Agent3 (PDF) 的輸出\ntry {\n  const agent3Output = $('B3. 整理 PDF 辨識結果').item?.json?.output;\n  if (agent3Output) rawText = agent3Output;\n} catch (e) {\n  // 如果 AI Agent3 沒執行，同樣忽略\n}\n\n// 將 Markdown 的 ** 粗體轉為 HTML <strong>\n// 將 Markdown 的 * 項目符號轉為 HTML <li>\nlet htmlText = rawText\n  .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n  .replace(/^\\*\\s(.*)$/gm, '<li>$1</li>')\n  .replace(/\\n/g, '<br>'); // 把換行變成 HTML 換行\n\nreturn { htmlText };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        2416
+      ],
+      "id": "270f91e1-1add-4a76-9aa5-9075869335bc",
+      "name": "H3. 組合 Email 內容"
+    },
+    {
+      "parameters": {
+        "sendTo": "= {{ $json.Gmail }}",
+        "subject": "={{$now.toFormat('yyyy/MM/dd')}}數位筆記",
+        "emailType": "text",
+        "message": "={{ $('A3. 整理圖片辨識結果').item?.json?.output || $('B3. 整理 PDF 辨識結果').item?.json?.output || '未接收到 AI 筆記內容' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        2272
+      ],
+      "id": "280ecde7-3dfa-455e-a107-548dd0bca360",
+      "name": "H5. 寄送純文字 Email",
+      "webhookId": "d906612a-63bd-45cc-a8de-ea2c62060878"
+    },
+    {
+      "parameters": {
+        "url": "=https://api-data.line.me/v2/bot/message/{{ $json.body.events[0].message.id }}/content",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        2304
+      ],
+      "id": "50935584-eee0-47ea-97a4-662dd6281e28",
+      "name": "A1. 下載 LINE 圖片"
+    },
+    {
+      "parameters": {
+        "url": "=https://api-data.line.me/v2/bot/message/{{ $json.body.events[0].message.id }}/content",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        2720
+      ],
+      "id": "2c5cf7f6-78f1-423e-bee4-c25ede86d342",
+      "name": "C1. 下載 LINE Word 檔案"
+    },
+    {
+      "parameters": {
+        "url": "=https://api-data.line.me/v2/bot/message/{{ $json.body.events[0].message.id }}/content",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "[REDACTED_SECRET]="
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        2512
+      ],
+      "id": "fb022222-d73f-4020-b7a6-a8a687e053b9",
+      "name": "B1. 下載 LINE PDF"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"output\": $json.output } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        912,
+        2304
+      ],
+      "id": "3f4adb55-8c43-4387-b833-d98c298bec2d",
+      "name": "回傳 OCR 辨識結果"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "E1. 舊版分析使用者訊息": {
+      "main": [
+        [
+          {
+            "node": "E2. 舊版整理對話欄位",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E6. 舊版生成對話回覆": {
+      "main": [
+        [
+          {
+            "node": "E7. 舊版回覆 LINE 訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "D1. OCR 結果整理模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "A3. 整理圖片辨識結果",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "B3. 整理 PDF 辨識結果",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E2. 舊版整理對話欄位": {
+      "main": [
+        [
+          {
+            "node": "E3. 舊版儲存使用者訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E3. 舊版儲存使用者訊息": {
+      "main": [
+        [
+          {
+            "node": "E4. 舊版讀取歷史對話",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E4. 舊版讀取歷史對話": {
+      "main": [
+        [
+          {
+            "node": "E5. 舊版組合對話上下文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E5. 舊版組合對話上下文": {
+      "main": [
+        [
+          {
+            "node": "E6. 舊版生成對話回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E9. 舊版呼叫工具流程": {
+      "ai_tool": [
+        [
+          {
+            "node": "E6. 舊版生成對話回覆",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2. 執行圖片文字辨識": {
+      "main": [
+        [
+          {
+            "node": "A3. 整理圖片辨識結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B2. 擷取 PDF 文字": {
+      "main": [
+        [
+          {
+            "node": "B3. 整理 PDF 辨識結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B3. 整理 PDF 辨識結果": {
+      "main": [
+        [
+          {
+            "node": "回傳 OCR 辨識結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "H1. 舊版回覆 LINE OCR 結果": {
+      "main": [
+        [
+          {
+            "node": "H2. 讀取 Email 收件資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "H2. 讀取 Email 收件資料": {
+      "main": [
+        [
+          {
+            "node": "H3. 組合 Email 內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E8. 舊版對話語言模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "E1. 舊版分析使用者訊息",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "E6. 舊版生成對話回覆",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3. 整理圖片辨識結果": {
+      "main": [
+        [
+          {
+            "node": "回傳 OCR 辨識結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "判斷 OCR 檔案類型": {
+      "main": [
+        [
+          {
+            "node": "A1. 下載 LINE 圖片",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "B1. 下載 LINE PDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "C1. 下載 LINE Word 檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "H3. 組合 Email 內容": {
+      "main": [
+        [
+          {
+            "node": "H4. 寄送 HTML 格式 Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1. 下載 LINE 圖片": {
+      "main": [
+        [
+          {
+            "node": "A2. 執行圖片文字辨識",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B1. 下載 LINE PDF": {
+      "main": [
+        [
+          {
+            "node": "B2. 擷取 PDF 文字",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "接收內部 OCR 請求": {
+      "main": [
+        [
+          {
+            "node": "判斷 OCR 檔案類型",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "51525623-899d-4357-8936-483eb63800e5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9e4e671a774c9d6ee8f309863edb9ffde40285fd60b5b07ada21add262b3319a"
+  },
+  "id": "eyQCmF6nq1IW8t5r",
+  "tags": [
+    {
+      "updatedAt": "2026-04-22T12:51:05.703Z",
+      "createdAt": "2026-04-22T12:51:05.703Z",
+      "id": "XgRAI4C5GWhHq3Ky",
+      "name": "Life of Light Church"
+    }
+  ]
+}
