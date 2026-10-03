@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+fail() {
+  echo "FAIL PRE_PUSH_$1" >&2
+  exit 1
+}
+
+[ -z "$(git status --porcelain)" ] || fail "WORKTREE_NOT_CLEAN"
+sh scripts/verify-workflows.sh || fail "WORKFLOW_VERIFICATION"
+
+zero=0000000000000000000000000000000000000000
+
+while read -r local_ref local_oid remote_ref remote_oid; do
+  [ "$remote_ref" = "refs/heads/main" ] || continue
+  [ "$local_ref" = "refs/heads/main" ] || fail "MAIN_SOURCE_REQUIRED"
+  [ "$remote_oid" = "$zero" ] && continue
+  git merge-base --is-ancestor "$remote_oid" "$local_oid" || fail "NON_FAST_FORWARD"
+done
+
+echo "PASS PRE_PUSH_GATE"
