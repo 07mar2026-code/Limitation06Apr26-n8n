@@ -5,13 +5,12 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "[REDACTED_SECRET]="
-            }
+            {}
           ]
         },
         "sendBody": true,
@@ -22,8 +21,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1392,
-        1184
+        2032,
+        1504
       ],
       "id": "aa31ebc2-e7f6-4a67-a7ff-70484e9f6c39",
       "name": "D7. 回覆 LINE 牧養訊息"
@@ -39,8 +38,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        240,
-        1168
+        304,
+        1504
       ],
       "id": "b5893ca7-fd0f-446c-bbc2-003e3d30cc73",
       "name": "D1. 分析使用者訊息"
@@ -56,8 +55,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1120,
-        1184
+        1680,
+        1504
       ],
       "id": "072381e8-bd0b-4ecd-aad0-f0ed72208031",
       "name": "D6. 生成牧養回覆"
@@ -97,8 +96,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        512,
-        1184
+        656,
+        1504
       ],
       "id": "2aa668b2-01dc-410d-89be-937b6595d2b0",
       "name": "D2. 整理對話紀錄欄位"
@@ -124,8 +123,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        816,
-        1184
+        1232,
+        1504
       ],
       "id": "6f878238-623c-4fd3-acfa-406239bb2fc1",
       "name": "D4. 讀取歷史對話紀錄"
@@ -137,8 +136,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        976,
-        1184
+        1456,
+        1504
       ],
       "id": "9c614e3f-5578-44a7-a475-12179b2b1daa",
       "name": "D5. 組合對話上下文"
@@ -180,8 +179,8 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        1264,
-        1472
+        1760,
+        1728
       ],
       "id": "341db00f-bf80-4cd3-9c42-2f09c301286a",
       "name": "D9. 呼叫牧養工具流程"
@@ -194,8 +193,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        240,
-        1360
+        960,
+        944
       ],
       "id": "7ba22118-6e1d-49d8-8ec7-d4db9690fc3d",
       "name": "D8. 牧養對話語言模型"
@@ -210,7 +209,7 @@
       "typeVersion": 2.1,
       "position": [
         -144,
-        960
+        1408
       ],
       "id": "a4158fe8-a571-408b-9f55-a333812a45e5",
       "name": "接收 LINE 事件",
@@ -298,6 +297,31 @@
                 },
                 "conditions": [
                   {
+                    "id": "d1c5c79b-95d6-47be-9b6d-aba16bd79b95",
+                    "leftValue": "={{ $json.body.events[0].message.text }}",
+                    "rightValue": "M1-連線測試-20261003",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "M1_TEST"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
                     "id": "2ae63348-82d4-486c-81e8-826fa7e973f0",
                     "leftValue": "={{ $json.body.events[0].message.text }}",
                     "rightValue": "",
@@ -367,8 +391,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        16,
-        960
+        80,
+        1344
       ],
       "id": "8f55753e-f252-4d21-bc80-d1d29d1eaff3",
       "name": "判斷 LINE 訊息類型"
@@ -394,8 +418,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        240,
-        720
+        368,
+        832
       ],
       "id": "2f9c8344-479c-4373-9878-854219fbaf0d",
       "name": "A1. 讀取近期活動資料"
@@ -411,7 +435,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        656,
+        880,
         720
       ],
       "id": "8ba5aa4e-ced3-4a84-88d4-6b5df7d83a33",
@@ -424,8 +448,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        720
+        656,
+        832
       ],
       "id": "25b32a9c-034f-486a-9ea3-5048c54e4ba7",
       "name": "A2. 整理近期活動內容"
@@ -434,13 +458,12 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "[REDACTED_SECRET]="
-            }
+            {}
           ]
         },
         "sendBody": true,
@@ -451,8 +474,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        944,
-        720
+        1232,
+        832
       ],
       "id": "e9618fa6-ec7f-4926-bb1a-867017174e82",
       "name": "A4. 回覆 LINE 近期活動"
@@ -478,8 +501,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        240,
-        848
+        368,
+        1120
       ],
       "id": "070b7347-0d89-408e-9ea5-002b6c8410c2",
       "name": "B1. 讀取工作討論串"
@@ -488,13 +511,12 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "[REDACTED_SECRET]="
-            }
+            {}
           ]
         },
         "sendBody": true,
@@ -505,8 +527,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        240,
-        1008
+        368,
+        1312
       ],
       "id": "e2506df7-5ce4-4160-befc-7de546b2c4d9",
       "name": "C1. 顯示討論串選單"
@@ -518,8 +540,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        384,
-        848
+        656,
+        1120
       ],
       "id": "bc3014f7-f39e-4020-83d0-548a26560186",
       "name": "B2. 整理工作討論串"
@@ -528,13 +550,12 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "[REDACTED_SECRET]="
-            }
+            {}
           ]
         },
         "sendBody": true,
@@ -545,8 +566,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        528,
-        848
+        944,
+        1120
       ],
       "id": "e4321240-9d81-47f8-8f84-269f9583dcf7",
       "name": "B3. 回覆 LINE 討論串內容"
@@ -602,8 +623,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        240,
-        1504
+        368,
+        1696
       ],
       "id": "c4b21ab1-da17-4ade-92c5-8c2e1ac8c598",
       "name": "E1. 儲存工作留言"
@@ -691,8 +712,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        656,
-        1184
+        944,
+        1504
       ],
       "id": "660049be-f6a4-4d7b-9e2b-44e19dfd2911",
       "name": "D3. 儲存使用者訊息"
@@ -711,21 +732,20 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        240,
-        1792
+        368,
+        1888
       ]
     },
     {
       "parameters": {
         "method": "POST",
         "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "[REDACTED_SECRET]="
-            }
+            {}
           ]
         },
         "sendBody": true,
@@ -736,11 +756,50 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        496,
-        1792
+        656,
+        1888
       ],
       "id": "2b0e09a7-ebe8-41d4-ae28-6e99773cdfb9",
       "name": "F2. 回覆 LINE OCR 結果"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  \"replyToken\": $('接收 LINE 事件').item.json.body.events[0].replyToken,\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"系統連線正常，願主賜你今日平安。\"\n    }\n  ]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2176,
+        1648
+      ],
+      "id": "38b58aac-c9f1-4f3c-8627-a9d6d995eb4d",
+      "name": "G1. 回覆 LINE M1 連線測試"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    功能名稱: 'M1 LINE 最小可用鏈路',\n    測試輸入: 'M1-連線測試-20261003',\n    預期結果: 'LINE 收到且只收到一則固定回覆',\n    實際結果: 'LINE Reply API 已接受固定回覆請求',\n    結果: 'PASS',\n    驗證時間: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        1600
+      ],
+      "id": "a8b9c431-fced-4258-bca5-1e93f3e95db3",
+      "name": "G2. 記錄 M1 驗證結果"
     }
   ],
   "pinData": {},
@@ -868,6 +927,13 @@
         ],
         [
           {
+            "node": "G1. 回覆 LINE M1 連線測試",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "D1. 分析使用者訊息",
             "type": "main",
             "index": 0
@@ -965,6 +1031,17 @@
           }
         ]
       ]
+    },
+    "G1. 回覆 LINE M1 連線測試": {
+      "main": [
+        [
+          {
+            "node": "G2. 記錄 M1 驗證結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -972,7 +1049,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "2128b350-3657-437d-b0a7-cd7404c94058",
+  "versionId": "776f148d-087c-44cd-a413-7db0309abe77",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "9e4e671a774c9d6ee8f309863edb9ffde40285fd60b5b07ada21add262b3319a"

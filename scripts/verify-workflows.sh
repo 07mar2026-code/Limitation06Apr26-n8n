@@ -103,7 +103,8 @@ fi
 
 if jq -e '
   ([.nodes[] | select(.name == "判斷 LINE 訊息類型") | .parameters.rules.values[] | select(.outputKey == "OCR")] | length == 1)
-  and (.connections["判斷 LINE 訊息類型"].main[5][0].node == "F1. 呼叫 OCR 辨識服務")
+  and (([.nodes[] | select(.name == "判斷 LINE 訊息類型") | .parameters.rules.values[].outputKey] | index("OCR")) as $ocr_index
+    | .connections["判斷 LINE 訊息類型"].main[$ocr_index][0].node == "F1. 呼叫 OCR 辨識服務")
   and (.connections["F1. 呼叫 OCR 辨識服務"].main[0][0].node == "F2. 回覆 LINE OCR 結果")
 ' "$daily_file" >/dev/null; then
   echo "PASS DAILY_OCR_CALL_CHAIN"
@@ -113,9 +114,9 @@ else
 fi
 
 if jq -e '
-  ([.nodes[].name] | length == 22)
-  and ([.nodes[].name] | unique | length == 22)
-  and ([.nodes[].name | select(. != "接收 LINE 事件" and . != "判斷 LINE 訊息類型") | test("^[A-F][0-9]+\\. ")] | all)
+  ([.nodes[].name] | length == 24)
+  and ([.nodes[].name] | unique | length == 24)
+  and ([.nodes[].name | select(. != "接收 LINE 事件" and . != "判斷 LINE 訊息類型") | test("^[A-G][0-9]+\\. ")] | all)
 ' "$daily_file" >/dev/null \
 && jq -e '
   ([.nodes[].name] | length == 28)
@@ -125,6 +126,18 @@ if jq -e '
   echo "PASS NODE_NAMING_SCHEME"
 else
   echo "FAIL NODE_NAMING_SCHEME"
+  status=1
+fi
+
+if jq -e '
+  ([.nodes[] | select(.name == "判斷 LINE 訊息類型") | .parameters.rules.values[] | select(.outputKey == "M1_TEST")] | length == 1)
+  and (([.nodes[] | select(.name == "判斷 LINE 訊息類型") | .parameters.rules.values[].outputKey] | index("M1_TEST")) as $m1_index
+    | .connections["判斷 LINE 訊息類型"].main[$m1_index][0].node == "G1. 回覆 LINE M1 連線測試")
+  and (.connections["G1. 回覆 LINE M1 連線測試"].main[0][0].node == "G2. 記錄 M1 驗證結果")
+' "$daily_file" >/dev/null; then
+  echo "PASS M1_TEST_CHAIN"
+else
+  echo "FAIL M1_TEST_CHAIN"
   status=1
 fi
 
