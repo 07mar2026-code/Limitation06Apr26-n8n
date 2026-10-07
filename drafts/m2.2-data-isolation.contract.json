@@ -1,0 +1,48 @@
+{
+  "status": "draft_only_not_published",
+  "phase": "M2.2-A",
+  "identity": {
+    "algorithm": "HMAC-SHA256",
+    "encoding": "base64url",
+    "version": "hmac-sha256-v1",
+    "secretReference": "PASTORAL_ID_HMAC_KEY",
+    "persistRawLineUserId": false
+  },
+  "consent": {
+    "default": false,
+    "requiredBeforeWrite": true,
+    "requiredBeforeHistoryRead": true,
+    "versionField": "保存同意版本"
+  },
+  "storage": {
+    "legacyMigration": "none",
+    "retentionDays": 30,
+    "timestampFormat": "UTC_ISO_8601",
+    "requiredColumns": [
+      "內部使用者ID",
+      "識別版本",
+      "建立時間",
+      "刪除期限",
+      "問題內容",
+      "問題類型",
+      "保存同意版本"
+    ]
+  },
+  "historyRead": {
+    "serverSideIdentityFilterRequired": true,
+    "retentionDays": 30,
+    "maxItems": 10,
+    "sort": "created_at_ascending",
+    "emptyHistoryFallback": "single_turn"
+  },
+  "contextGuard": {
+    "verifyEveryItemIdentity": true,
+    "onIdentityMismatch": "block_and_safe_fallback",
+    "exposeInternalIdentifierToModel": false
+  },
+  "liveWorkflow": {
+    "d4MustRemainDisabled": true,
+    "publishAllowed": false,
+    "realUserTestAllowed": false
+  }
+}
