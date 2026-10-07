@@ -114,9 +114,9 @@ else
 fi
 
 if jq -e '
-  ([.nodes[].name] | length == 24)
-  and ([.nodes[].name] | unique | length == 24)
-  and ([.nodes[].name | select(. != "接收 LINE 事件" and . != "判斷 LINE 訊息類型") | test("^[A-G][0-9]+\\. ")] | all)
+  ([.nodes[].name] | length == 25)
+  and ([.nodes[].name] | unique | length == 25)
+  and ([.nodes[].name | select(. != "接收 LINE 事件" and . != "判斷 LINE 訊息類型") | test("^[A-G][0-9]+(\\.[0-9]+)?\\. ")] | all)
 ' "$daily_file" >/dev/null \
 && jq -e '
   ([.nodes[].name] | length == 28)
@@ -138,6 +138,32 @@ if jq -e '
   echo "PASS M1_TEST_CHAIN"
 else
   echo "FAIL M1_TEST_CHAIN"
+  status=1
+fi
+
+if jq -e '
+  ([.nodes[] | select(.name == "D4. 讀取歷史對話紀錄" and .disabled == true)] | length == 1)
+  and (.connections["D3. 儲存使用者訊息"].main[0][0].node == "D4. 讀取歷史對話紀錄")
+  and (.connections["D4. 讀取歷史對話紀錄"].main[0][0].node == "D5. 組合對話上下文")
+  and ([.nodes[] | select(.name == "D5. 組合對話上下文") | .parameters.jsCode | contains("$input.all()") and contains("問題內容")] | all)
+' "$daily_file" >/dev/null; then
+  echo "PASS M2_1_SINGLE_TURN_MODE"
+else
+  echo "FAIL M2_1_SINGLE_TURN_MODE"
+  status=1
+fi
+
+if jq -e '
+  ([.nodes[] | select(.name == "D10. M2 專用語言模型" and .parameters.model == "openai/gpt-oss-20b")] | length == 1)
+  and ([.nodes[] | select(.name == "A3.1. 牧養對話語言模型")] | length == 1)
+  and ([.nodes[] | select(.name == "D8. 牧養對話語言模型")] | length == 0)
+  and ([.connections["A3.1. 牧養對話語言模型"].ai_languageModel[][]?.node] == ["A3. 生成近期活動回覆"])
+  and (.connections["D8. 牧養對話語言模型"] == null)
+  and ([.connections["D10. M2 專用語言模型"].ai_languageModel[][]?.node] | sort == ["D1. 分析使用者訊息", "D6. 生成牧養回覆"])
+' "$daily_file" >/dev/null; then
+  echo "PASS M2_1_MODEL_ISOLATION"
+else
+  echo "FAIL M2_1_MODEL_ISOLATION"
   status=1
 fi
 

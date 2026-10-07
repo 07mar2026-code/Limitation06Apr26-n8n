@@ -127,7 +127,8 @@
         1504
       ],
       "id": "6f878238-623c-4fd3-acfa-406239bb2fc1",
-      "name": "D4. 讀取歷史對話紀錄"
+      "name": "D4. 讀取歷史對話紀錄",
+      "disabled": true
     },
     {
       "parameters": {
@@ -187,20 +188,6 @@
     },
     {
       "parameters": {
-        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
-      "typeVersion": 1,
-      "position": [
-        960,
-        944
-      ],
-      "id": "7ba22118-6e1d-49d8-8ec7-d4db9690fc3d",
-      "name": "D8. 牧養對話語言模型"
-    },
-    {
-      "parameters": {
         "httpMethod": "POST",
         "path": "[REDACTED_LINE_WEBHOOK_PATH]",
         "options": {}
@@ -209,7 +196,7 @@
       "typeVersion": 2.1,
       "position": [
         -144,
-        1408
+        1504
       ],
       "id": "a4158fe8-a571-408b-9f55-a333812a45e5",
       "name": "接收 LINE 事件",
@@ -392,7 +379,7 @@
       "typeVersion": 3.4,
       "position": [
         80,
-        1344
+        1424
       ],
       "id": "8f55753e-f252-4d21-bc80-d1d29d1eaff3",
       "name": "判斷 LINE 訊息類型"
@@ -624,7 +611,7 @@
       "typeVersion": 4.7,
       "position": [
         368,
-        1696
+        1888
       ],
       "id": "c4b21ab1-da17-4ade-92c5-8c2e1ac8c598",
       "name": "E1. 儲存工作留言"
@@ -733,7 +720,7 @@
       "typeVersion": 4.4,
       "position": [
         368,
-        1888
+        2080
       ]
     },
     {
@@ -757,7 +744,7 @@
       "typeVersion": 4.4,
       "position": [
         656,
-        1888
+        2080
       ],
       "id": "2b0e09a7-ebe8-41d4-ae28-6e99773cdfb9",
       "name": "F2. 回覆 LINE OCR 結果"
@@ -782,8 +769,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2176,
-        1648
+        368,
+        1696
       ],
       "id": "38b58aac-c9f1-4f3c-8627-a9d6d995eb4d",
       "name": "G1. 回覆 LINE M1 連線測試"
@@ -795,11 +782,39 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1568,
-        1600
+        656,
+        1696
       ],
       "id": "a8b9c431-fced-4258-bca5-1e93f3e95db3",
       "name": "G2. 記錄 M1 驗證結果"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        1824
+      ],
+      "id": "f2fcccec-9c4a-4bdc-8879-503721ca6bc4",
+      "name": "D10. M2 專用語言模型"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        960,
+        944
+      ],
+      "id": "7ba22118-6e1d-49d8-8ec7-d4db9690fc3d",
+      "name": "A3.1. 牧養對話語言模型"
     }
   ],
   "pinData": {},
@@ -865,27 +880,6 @@
           {
             "node": "D6. 生成牧養回覆",
             "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "D8. 牧養對話語言模型": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "D1. 分析使用者訊息",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "D6. 生成牧養回覆",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "A3. 生成近期活動回覆",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -1042,6 +1036,33 @@
           }
         ]
       ]
+    },
+    "D10. M2 專用語言模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "D1. 分析使用者訊息",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "D6. 生成牧養回覆",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3.1. 牧養對話語言模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "A3. 生成近期活動回覆",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -1049,7 +1070,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "776f148d-087c-44cd-a413-7db0309abe77",
+  "versionId": "b4397a05-167a-4a85-a67b-d660487f9282",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "9e4e671a774c9d6ee8f309863edb9ffde40285fd60b5b07ada21add262b3319a"
