@@ -38,7 +38,21 @@
   "contextGuard": {
     "verifyEveryItemIdentity": true,
     "onIdentityMismatch": "block_and_safe_fallback",
-    "exposeInternalIdentifierToModel": false
+    "exposeInternalIdentifierToModel": false,
+    "failClosed": true,
+    "blockedOutput": {
+      "history": [],
+      "sendToModel": false
+    },
+    "blockOn": [
+      "missing_or_invalid_source_identifier",
+      "missing_hmac_key",
+      "hmac_computation_failure",
+      "consent_not_explicitly_true",
+      "mixed_internal_id",
+      "malformed_record",
+      "invalid_timestamp"
+    ]
   },
   "liveWorkflow": {
     "d4MustRemainDisabled": true,

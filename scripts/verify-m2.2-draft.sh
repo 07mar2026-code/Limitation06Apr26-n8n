@@ -36,6 +36,10 @@ jq -e '
   and .contextGuard.verifyEveryItemIdentity == true
   and .contextGuard.onIdentityMismatch == "block_and_safe_fallback"
   and .contextGuard.exposeInternalIdentifierToModel == false
+  and .contextGuard.failClosed == true
+  and .contextGuard.blockedOutput.history == []
+  and .contextGuard.blockedOutput.sendToModel == false
+  and (.contextGuard.blockOn | length == 7)
   and .liveWorkflow.d4MustRemainDisabled == true
   and .liveWorkflow.publishAllowed == false
   and .liveWorkflow.realUserTestAllowed == false
@@ -52,6 +56,8 @@ jq -e '
   and .meta.productionWebhookConnected == false
   and ([.nodes[] | select(.type | test("webhook"; "i"))] | length == 0)
   and ([.nodes[] | select(.parameters.jsCode? | strings | contains("PASTORAL_ID_HMAC_KEY"))] | length == 1)
+  and ([.nodes[] | select(.parameters.jsCode? | strings | contains("failClosed: true"))] | length == 1)
+  and ([.nodes[] | select(.parameters.jsCode? | strings | contains("sendToModel: false"))] | length == 1)
 ' "$test_workflow" >/dev/null
 echo "PASS M2_2_TEST_WORKFLOW_ISOLATED_UNPUBLISHED"
 
