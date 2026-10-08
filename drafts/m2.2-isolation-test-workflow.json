@@ -1,0 +1,39 @@
+{
+  "name": "M2.2 資料隔離合成測試（草稿）",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c8f84fd7-15fa-4c0f-983a-51bc195d90a1",
+      "name": "手動啟動合成測試",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-320, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const secretReference = 'PASTORAL_ID_HMAC_KEY';\nconst secret = $env[secretReference];\nif (!secret) throw new Error('PASTORAL_ID_HMAC_KEY is required');\n\n// 此草稿只接受 synthetic-user-a／synthetic-user-b 等合成識別，不接 LINE webhook。\n// HMAC 輸出、原始合成識別與秘密值均不得輸出到 execution 結果。\nreturn [{ json: {\n  draftOnly: true,\n  webhookConnected: false,\n  identityAlgorithm: 'HMAC-SHA256',\n  identityEncoding: 'base64url',\n  identityVersion: 'hmac-sha256-v1',\n  consentDefault: false,\n  retentionDays: 30,\n  maxHistoryItems: 10,\n  serverSideIdentityFilterRequired: true,\n  verifyEveryItemIdentity: true,\n  onIdentityMismatch: 'block_and_safe_fallback',\n  modelAllowedOnMismatch: false,\n  secretConfigured: true\n} }];"
+      },
+      "id": "29dc0602-a1cc-455d-a597-72cfed250af9",
+      "name": "驗證隔離安全契約",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-64, 0]
+    }
+  ],
+  "connections": {
+    "手動啟動合成測試": {
+      "main": [[{ "node": "驗證隔離安全契約", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "tags": [],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "draftOnly": true,
+    "productionWebhookConnected": false
+  }
+}

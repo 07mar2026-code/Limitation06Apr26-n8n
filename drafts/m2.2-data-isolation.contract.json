@@ -44,5 +44,12 @@
     "d4MustRemainDisabled": true,
     "publishAllowed": false,
     "realUserTestAllowed": false
+  },
+  "testDraft": {
+    "workflowFile": "drafts/m2.2-isolation-test-workflow.json",
+    "productionWebhookConnected": false,
+    "active": false,
+    "syntheticDataOnly": true,
+    "testRunner": "scripts/test-m2.2-isolation.mjs"
   }
 }
