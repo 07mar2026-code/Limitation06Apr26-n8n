@@ -1,6 +1,6 @@
 # M2.2-C 續作包
 
-更新時間：2026-10-11 18:09（Asia/Taipei）
+更新時間：2026-10-12 21:26（Asia/Taipei）
 
 用途：集中保存 `M2.2-C 提示詞優化與經文正確性驗證` 的現行規則、最新進度、模組規格、測試證據與後續正式案例。新對話應先讀本頁，再依序讀取 `01` 至 `04`。
 
@@ -13,7 +13,7 @@
 
 ## 二、目前一句話狀態
 
-`M2.2-C4` 已在未發布安全副本的獨立無副作用測試鏈通過；固定撤回／刪除 fixture 已完成 `1／1 → 0／0`，30 天／最近 10 筆已完成 `13 → 10`，錯誤 ID、compact 預覽及精確續期亦已在未發布獨立 workflow 通過。測後固定 fixture 為 `0／0`、Google Sheet 整體有效資料回到保存同意 2、歷史對話 2。正式 `Daily Shepherd` 維持 Published、正式 D4 維持 Deactivated，所有新增驗證 workflow 皆未發布；本輪未發布正式功能、未 push。
+`M2.2-C4` 與第五、六階段合成案例均已在未發布獨立 workflow 通過；無寫入記憶體韌性壓測的 10／25／50 筆與 25 筆、併發 2 已於 execution `#594` 通過。有限 Google Sheet 寫入壓測 JSON 已產生，但因瀏覽器上傳權限未授予而停在匯入前，沒有 Sheet 寫入或刪除。最新有效資料仍為保存同意 2、歷史對話 2；正式 `Daily Shepherd` 維持 Published、正式 D4 維持 Deactivated，所有新增驗證 workflow 皆未發布，本輪未發布正式功能、未 push。
 
 ## 三、新舊文件對照
 
@@ -36,6 +36,17 @@
 - `scripts/test-m2.2-c-spiritual-source.mjs`
 
 上述資產目前仍保存在既有安全 checkpoint；若要納入正式 Git 版本，必須先確認檔案歸屬、去敏與工作樹範圍，不得連同 `node_modules`、輸出圖片、試算表或其他無關檔案一起提交。
+
+本輪壓測另有兩組私人準備資產，均位於 `.private/`、不在 Git 工作樹清單內，也不等於正式文件：
+
+- `.private/build-m2.2-stress.mjs`
+- `.private/M2.2-C-記憶體韌性壓測-修正版-未發布.json`
+- `.private/build-m2.2-sheet-stress.mjs`
+- `.private/M2.2-C-Sheet有限寫入壓測-未發布.json`
+
+## 六、本輪最新結果（2026-10-12）
+
+有限 Google Sheet 寫入壓測已解除 BLOCKED 並完成 execution `#600`：10 筆與 25 筆固定合成 fixture 均完成精確寫入、回讀、清理及 `0／0` 驗收；最終 Google Sheet 畫面回讀為保存同意 2、歷史對話 2。workflow `2HS1TfYxR6Sc1VFA` 維持未發布，未執行 LINE、模型或 production webhook。本輪只更新續作包，未 Publish、未 commit、未 push。
 
 ## 五、狀態用語
 
